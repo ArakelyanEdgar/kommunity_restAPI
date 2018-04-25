@@ -9,8 +9,8 @@ const {User} = require('../db/models/user')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const _ = require('lodash')
+const {authenticate} = require('./middleware/authenticate')
 
-//middleware
 app.use(bodyParser.json())             
 app.use(cookieParser())
 
@@ -20,7 +20,6 @@ app.post('/users/signup', async (req, res) => {
     if (!body.username || !body.password)
         return res.status(400).send()
     let user = new User(body)
-
     try{
         //create user
         user = await user.save()
@@ -50,14 +49,13 @@ app.get('/users/:username', async (req, res) => {
 })
 
 //DELETE /users/username | removes user with username
-app.delete('/users/:username', async (req, res) => {
-    let username = req.params.username
-
+app.delete('/users/:username', authenticate, async (req, res) => {
     try{
-        let user = await User.findOne({username})
-        if (!user)
-            return res.status(404).send()
-        await user.remove()
+        //check if user is only deleting their own user and then do it
+        if (req.params.username !== req.user.username)
+            return res.status(401).send()
+        await req.user.remove()
+        res.clearCookie('x-auth')
         return res.status(200).send()
     }catch(e){
         return res.status(400).send()
