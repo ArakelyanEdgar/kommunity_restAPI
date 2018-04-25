@@ -44,8 +44,8 @@ app.delete('/users/:username', async (req, res) => {
 
 //POST /signup | creates a new user
 app.post('/users/signup', async (req, res) => {
-    let body = _.pick(req.body, 'username')
-    if (!body.username)
+    let body = _.pick(req.body, 'username', 'password')
+    if (!body.username || !body.password)
         return res.status(400).send()
     let user = new User(body)
 
