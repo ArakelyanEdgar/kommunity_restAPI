@@ -9,7 +9,8 @@ const authenticate = async (req, res, next) => {
     //find if user with token exists
     try{
         let user = await User.findByToken(token)
-        req.user = user
+        //save token to req so that we can findByToken again and verify other requests such as remove account
+        req.token = user.token
         next()
     }catch(err){
         res.status(401).send()
