@@ -4,6 +4,7 @@ const app = express()
 //database libraries
 const {mongoose} = require('../db/server/mongoose')
 const {User} = require('../db/models/user')
+const {Geolocation} = require('../db/models/geolocation')
 
 //libraries
 const bodyParser = require('body-parser')
@@ -22,7 +23,6 @@ app.post('/users/signup', async (req, res) => {
         return res.status(400).send()
     let user = new User(body)
     try{
-        //create user
         user = await user.save()
         //clear possible cookie x-auth token from past session
         res.clearCookie('x-auth')
@@ -80,6 +80,25 @@ app.delete('/users/removeUser', authenticate, async (req, res) => {
     }catch(e){
         return res.status(400).send()
     }
+})
+
+//POST /geolocation | adds user's geolocation
+app.post('/geolocation', authenticate, async (req, res) => {
+    let body = _.pick(req.body, 'latitude', 'longitude')
+    try{
+        let user = await User.findByToken(req.token)
+        body.user = user._id
+        let geolocation = await new Geolocation(body)
+        await geolocation.save()
+        res.status(200).send()
+    }catch(err){
+        res.status(400).send()
+    }
+})
+
+//DELETE /geolocation | removes user's geolocation
+app.delete('/geolocation', authenticate, async (req, res) => {
+
 })
 
 
