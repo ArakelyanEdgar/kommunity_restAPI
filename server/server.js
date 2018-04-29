@@ -115,6 +115,16 @@ app.patch('/geolocation', authenticate, async(req, res) => {
     res.status(200).send()
 })
 
+//GET /findNearbyUsers | returns with all users near the threshold
+app.post('/findNearbyUsers', authenticate, async (req, res) => {
+    let threshold = req.body.threshold
+    if (!threshold)
+        threshold = 25
+    let user = await User.findByToken(req.token)
+    let userGeo = await Geolocation.findOne({user: user._id})
+    let nearbyUsers = await Geolocation.findNearbyUsersByGeolocation(userGeo, user.username, threshold)
+    res.status(200).send(nearbyUsers)
+})
 
 let port = process.env.PORT || 5000;
 app.listen(port, () => {
