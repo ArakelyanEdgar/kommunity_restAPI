@@ -88,6 +88,10 @@ app.post('/geolocation', authenticate, async (req, res) => {
     try{
         let user = await User.findByToken(req.token)
         body.user = user._id
+        //only allow user to have one geolocation at a time
+        let userGeo = await Geolocation.findOne({user: body.user})
+        if (userGeo)
+            throw new Error()
         let geolocation = await new Geolocation(body)
         await geolocation.save()
         res.status(200).send()
