@@ -98,7 +98,15 @@ app.post('/geolocation', authenticate, async (req, res) => {
 
 //DELETE /geolocation | removes user's geolocation
 app.delete('/geolocation', authenticate, async (req, res) => {
-
+    try{
+        let user = await User.findByToken(req.token)
+        let deletedGeolocation = await Geolocation.findOneAndRemove({user: user._id})
+        if (!deletedGeolocation)
+            throw new Error()
+        res.status(200).send()
+    }catch(err){
+        res.status(400).send()
+    }
 })
 
 

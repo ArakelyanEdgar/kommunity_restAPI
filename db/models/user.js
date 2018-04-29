@@ -72,7 +72,7 @@ userSchema.statics.findByToken = async function(token){
             throw new Error()
         return user
     }catch(err){
-        return err
+        //uncaught exception
     }
 }
 
