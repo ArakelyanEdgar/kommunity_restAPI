@@ -11,6 +11,7 @@ const authenticate = async (req, res, next) => {
         let user = await User.findByToken(token)
         //save token to req so that we can findByToken again and verify other requests such as remove account
         req.token = user.token
+        req.email = user.email
         next()
     }catch(err){
         res.status(401).send()

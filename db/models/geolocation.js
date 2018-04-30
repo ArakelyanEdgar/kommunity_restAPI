@@ -21,15 +21,15 @@ const geolocationSchema = new mongoose.Schema({
 })
 
 //Finds all nearby geolocations given the threshold and returns the users associated with them
-geolocationSchema.statics.findNearbyUsersByGeolocation = async function(userGeolocation, username, threshold){
+geolocationSchema.statics.findNearbyUsersByGeolocation = async function(userGeolocation, email, threshold){
     let closeUsers = []
     let geolocations = await this.find({})
     for (let geoloc of geolocations){
         if (haversine(userGeolocation, geoloc, {unit: 'mile', threshold})){
             let nearbyUser = await User.findById(geoloc.user)
-            if (nearbyUser.username === username)
+            if (nearbyUser.email === email)
                 continue
-            closeUsers.push(nearbyUser.username)
+            closeUsers.push(nearbyUser.email)
         }
     }
     

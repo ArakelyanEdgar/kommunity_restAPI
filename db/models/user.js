@@ -1,15 +1,20 @@
 //DEFINES USER SCHEMA
-
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+let Validator = require('validator')
 
 const userSchema = new mongoose.Schema({
-    username: {
+    email: {
         type: String,
         required: true,
-        maxlength: 16,
-        minlength: 2
+        unique: true,
+        trim: true,
+        minlength: 1,
+        validate: {
+            validator: Validator.isEmail,
+            message: '{VALUE} is not a valid email'
+        }
     },
     password: {
         type: String,

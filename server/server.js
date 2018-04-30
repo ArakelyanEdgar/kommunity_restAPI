@@ -18,34 +18,31 @@ app.use(cookieParser())
 
 //POST /signup | creates a new user
 app.post('/users/signup', async (req, res) => {
-    let body = _.pick(req.body, 'username', 'password')
-    if (!body.username || !body.password)
+    let body = _.pick(req.body, 'email', 'password')
+    console.log(body)
+    if (!body.email || !body.password)
         return res.status(400).send()
-    //if user provided email, then send them an email and store it for newsletters
-    if(req.body.email)
-        app.use(sendEmail)
     let user = new User(body)
+
     try{
         user = await user.save()
-        //clear possible cookie x-auth token from past session
-        res.clearCookie('x-auth')
-        //get auth token and create cookie
         let token = await user.generateAuthToken()
-        res.status(200).cookie('x-auth', token).send()
+        app.use(sendEmail)
+        res.status(200).clearCookie('x-auth').cookie('x-auth', token).send()
     }catch(e){
         return res.status(400).send()
     }
 })
 
-//POST /users/login | users logs in if password is verified for username
+//POST /users/login | users logs in if password is verified for email
 app.post('/users/login', async (req, res) => {
-    let body = _.pick(req.body, 'username', 'password')
+    let body = _.pick(req.body, 'email', 'password')
 
-    if (!body.username || !body.password)
+    if (!body.email || !body.password)
         return res.status(400).send()
 
     try{
-        let user = await User.findOne({username: body.username})
+        let user = await User.findOne({email: body.email})
         if (!user)
             return res.status(404).send()
 
@@ -68,13 +65,13 @@ app.get('/users/logout', authenticate, (req, res) => {
 })
 
 
-//DELETE /users/username | removes user with username if user is authenticated
+//DELETE /users/removeUser | removes user with email if user is authenticated
 app.delete('/users/removeUser', authenticate, async (req, res) => {
-    let body = _.pick(req.body, 'username', 'password')
+    let body = _.pick(req.body, 'email', 'password')
     try{
         //find user with current auth token and determine if it is the same user they are trying to delete
         let user = await User.findByToken(req.token)
-        if (body.username !== user.username)
+        if (body.email !== user.email)
             return res.status(401).send()
         await user.verifyPassword(body.password)
         await user.remove()
@@ -125,7 +122,7 @@ app.post('/findNearbyUsers', authenticate, async (req, res) => {
         threshold = 25
     let user = await User.findByToken(req.token)
     let userGeo = await Geolocation.findOne({user: user._id})
-    let nearbyUsers = await Geolocation.findNearbyUsersByGeolocation(userGeo, user.username, threshold)
+    let nearbyUsers = await Geolocation.findNearbyUsersByGeolocation(userGeo, user.email, threshold)
     res.status(200).send(nearbyUsers)
 })
 
@@ -133,3 +130,7 @@ let port = process.env.PORT || 5000;
 app.listen(port, () => {
     console.log(`Server deployed on port: ${port}`)
 })
+
+module.exports = {
+    app
+}
