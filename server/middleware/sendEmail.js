@@ -4,8 +4,8 @@ const sgTransport = require('nodemailer-sendgrid-transport');
 var options = {
     service: 'SendGrid',
     auth: {
-        api_user: 'lambo4bkfast',
-        api_key: 'Gameofthrones123#'
+        api_user: '///',
+        api_key: '///'
     }
 }
 
