@@ -63,17 +63,13 @@ userSchema.methods.generateAuthToken = async function(){
 
 //find a user with the token and jwt.verify that the decoded user is the same as the user with the given token
 userSchema.statics.findByToken = async function(token){
-    try{
-        let user = await this.findOne({token})
-        if (!user)
-            throw new Error()
-        let decodedUser = jwt.verify(token, 'key')
-        if (decodedUser._id !== user._id.toHexString())
-            throw new Error()
-        return user
-    }catch(err){
-        //uncaught exception
-    }
+    let user = await this.findOne({token})
+    if (!user)
+        throw new Error()
+    let decodedUser = jwt.verify(token, 'key')
+    if (decodedUser._id !== user._id.toHexString())
+        throw new Error()
+    return user
 }
 
 //Creates users collection

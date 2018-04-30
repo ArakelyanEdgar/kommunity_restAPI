@@ -11,7 +11,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const _ = require('lodash')
 const {authenticate} = require('./middleware/authenticate')
-const nodemailer = require('nodemailer')
+const {sendEmail} = require('./middleware/sendEmail')
 
 app.use(bodyParser.json())             
 app.use(cookieParser())
@@ -21,6 +21,9 @@ app.post('/users/signup', async (req, res) => {
     let body = _.pick(req.body, 'username', 'password')
     if (!body.username || !body.password)
         return res.status(400).send()
+    //if user provided email, then send them an email and store it for newsletters
+    if(req.body.email)
+        app.use(sendEmail)
     let user = new User(body)
     try{
         user = await user.save()
